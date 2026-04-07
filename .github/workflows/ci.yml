@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  # ── Quality checks ──────────────────────────────────────────────────────────
+  quality:
+    name: Lint & type-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Lint (ruff)
+        run: uv run ruff check . --show-fixes
+
+      - name: Format check (ruff)
+        run: uv run ruff format --check .
+
+      - name: Type-check (mypy)
+        run: uv run mypy src/ptmdiscoverer src/agentic_framework_pkg || true
+
+  # ── Tests ───────────────────────────────────────────────────────────────────
+  test:
+    name: Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run tests with coverage
+        env:
+          PYTHONWARNINGS: default
+        run: uv run pytest -q --cov=ptmdiscoverer --cov=agentic_framework_pkg --cov-report=xml --cov-report=term
+
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.11' && always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  # ── Dependency vulnerability audit ─────────────────────────────────────────
+  audit:
+    name: Dependency audit (pip-audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run pip-audit
+        # continue-on-error so a transitive vuln doesn't block unrelated PRs;
+        # remove this flag once the audit report is being triaged.
+        continue-on-error: true
+        run: uv run pip-audit -f json -o pip-audit-report.json
+
+      - name: Upload pip-audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-report
+          path: pip-audit-report.json
+
+  # ── Docs build ──────────────────────────────────────────────────────────────
+  docs:
+    name: Build docs (pdoc)
+    runs-on: ubuntu-latest
+    needs: [quality, test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Build documentation
+        run: uv run pdoc --html ptmdiscoverer agentic_framework_pkg --output-dir docs/api --force
+
+      - name: Upload docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: docs/api

@@ -1,0 +1,146 @@
+[project]
+name = "ptmdiscoverer"
+version = "0.1.0"
+description = "PTMdiscoverer leverages generative AI to accelerate the discovery of post-translational modifications (PTMs) in proteomics experiments. It identifies delta masses in peptide fragmentation patterns from mass spectrometry (MS) data and utilizes a large language model (LLM) for their annotation and interpretation across various phenotypes or experimental conditions."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "matplotlib>=3.10.6",
+    "openai>=1.106.1",
+    "pandas>=2.3.2",
+]
+
+[project.optional-dependencies]
+# Standalone PTMdiscoverer MCP server (lightweight, no agentic framework)
+mcp = [
+    "mcp[cli]>=1.6.0",
+]
+# Jupyter notebook extras for data exploration
+notebook = [
+    "h5py>=3.14.0",
+    "hdf5plugin>=5.1.0",
+    "jupyterlab>=4.4.7",
+    "matplotlib>=3.10.6",
+    "numpy>=2.2.6",
+    "ipykernel>=6.29.5",
+]
+# Full ADEPT agentic framework — MCP server, LangChain agent, Streamlit UI.
+# Install with:  uv pip install -e ".[adept]"
+adept = [
+    "fastmcp>=2.6.0",
+    "mcp",
+    "litellm>=1.15.0",
+    "langchain>=0.3.0",
+    "langchain-openai",
+    "langchain-community",
+    "streamlit>=1.20.0",
+    "aiosqlite>=0.17.0",
+    "chromadb>=1.0.12",
+    "uvicorn[standard]>=0.20.0",
+    "python-dotenv>=1.0.0",
+    "numpy>=1.20.0",
+    "fastapi",
+    "biopython",
+    "rdkit-pypi",
+    "chembl_webresource_client",
+    "meeko",
+    "selenium",
+    "webdriver_manager",
+    "watchdog",
+    "PyMuPDF>=1.23.0",
+    "openpyxl",
+    "python-docx",
+    "pubchempy",
+    "gemmi",
+]
+
+[project.scripts]
+# Standalone PTMdiscoverer CLI
+ptmdiscoverer = "ptmdiscoverer.cli:main"
+# PTMdiscoverer standalone MCP server
+ptmdiscoverer-mcp = "ptmdiscoverer.mcp_server:main"
+# ADEPT agentic framework servers
+run-mcp-server = "agentic_framework_pkg.mcp_server.main:start_server_cli"
+run-streamlit-harness = "agentic_framework_pkg.streamlit_app.main:start_harness_cli"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.19.1",
+    "pdoc>=15.0.0",
+    "pip-audit>=2.5.0",
+    "pytest>=8.3.0",
+    "pytest-asyncio>=1.0.0",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.0.0",
+    "ruff>=0.5.0",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+fix = true
+show-fixes = true
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "S", "W"]
+ignore = [
+    "E501",  # long lines allowed
+    "S101",  # allow assert in tests
+    "S105",  # ignore hardcoded password false positive
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["ptmdiscoverer", "agentic_framework_pkg"]
+combine-as-imports = true
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+check_untyped_defs = true
+ignore_missing_imports = true
+
+[tool.coverage.run]
+# Scope: ptmdiscoverer core + its ADEPT interface adapter files only.
+# All other ADEPT framework files (Streamlit, BLAST, RAG, LangChain agent, etc.)
+# are excluded because they require live services or are out of scope for this sweep.
+source = ["ptmdiscoverer", "agentic_framework_pkg"]
+omit = [
+    # ADEPT framework — out of scope for this sweep
+    "*/streamlit_app/*",
+    "*/core/*",
+    "*/mcp_server/main.py",
+    "*/mcp_server/server.py",
+    "*/mcp_server/tools/blastq_tool.py",
+    "*/mcp_server/tools/csv_rag_tool.py",
+    "*/mcp_server/tools/pubchem_tool.py",
+    "*/mcp_server/tools/uniprot_tool.py",
+    "*/mcp_server/tools/websearch_tool.py",
+    "*/mcp_server/tools/general_tools.py",
+    "*/mcp_server/vector_store_manager.py",
+    "*/mcp_server/state_manager.py",
+    "*/scientific_workflow/langchain_agent.py",
+    "*/scientific_workflow/mcp_langchain_tools.py",
+]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+skip_empty = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+    "unit: fast isolated unit tests",
+    "integration: slower end-to-end tests",
+    "slow: slow-running tests (deselect with -m 'not slow')",
+]

@@ -1,0 +1,81 @@
+# docker-compose.yaml — ADEPT + PTMdiscoverer services
+# Usage: ./scripts/start-app.sh  (or: docker compose up from repo root)
+
+services:
+  mcp_server:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp_server
+    container_name: agentic_mcp_server
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./data/app_data:/app/data
+      - shared_uploads:/app/data/uploaded_files
+      - ./data/app_data/ptm_studies:/app/ptm_studies
+    environment:
+      - INTERNAL_LLM_API_KEY=${INTERNAL_LLM_API_KEY}
+      - INTERNAL_LLM_BASE_URL=${INTERNAL_LLM_BASE_URL}
+      - INTERNAL_LLM_MODEL=${INTERNAL_LLM_MODEL}
+      - INTERNAL_LLM_EMBEDDING_MODEL=${INTERNAL_LLM_EMBEDDING_MODEL}
+      - PTM_LLM_CALL_TIMEOUT_SECONDS=1800
+      - EMBEDDING_DEFAULT_MODEL=${INTERNAL_LLM_EMBEDDING_MODEL:-text-embedding-3-small}
+      - DEFAULT_LLM_MODEL=${INTERNAL_LLM_MODEL:-gpt-3.5-turbo}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - AZURE_API_KEY=${AZURE_API_KEY}
+      - AZURE_API_BASE=${AZURE_API_BASE}
+      - AZURE_API_VERSION=${AZURE_API_VERSION} # Often required by LiteLLM for Azure
+      - VERTEXAI_PROJECT=${VERTEXAI_PROJECT}
+      - VERTEXAI_LOCATION=${VERTEXAI_LOCATION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION_NAME=${AWS_REGION_NAME}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - OLLAMA_API_BASE=${OLLAMA_API_BASE}
+      - PTM_STUDIES_BASE_DIR=/app/ptm_studies
+      - CHROMA_DB_PATH=/app/data/chroma_data
+    restart: unless-stopped
+    networks:
+      - agentic_network
+
+  streamlit_app:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit_app
+    container_name: agentic_streamlit_app
+    user: "0:0"
+    ports:
+      - "127.0.0.1:8501:8501"
+    volumes:
+      - ./data/app_data:/app/data
+      - shared_uploads:/app/data/uploaded_files
+      - ./data/app_data/ptm_studies:/app/ptm_studies
+    environment:
+      - MCP_SERVER_URL=http://mcp_server:8080/mcp
+      - MCP_SERVER_URL_FOR_LANGCHAIN=http://mcp_server:8080/mcp
+      - MCP_TOOL_TIMEOUT=3600
+      - INTERNAL_LLM_API_KEY=${INTERNAL_LLM_API_KEY}
+      - INTERNAL_LLM_BASE_URL=${INTERNAL_LLM_BASE_URL}
+      - INTERNAL_LLM_MODEL=${INTERNAL_LLM_MODEL}
+      - INTERNAL_LLM_EMBEDDING_MODEL=${INTERNAL_LLM_EMBEDDING_MODEL}
+      - LANGCHAIN_LLM_MODEL=${LANGCHAIN_LLM_MODEL}
+      - AZURE_API_KEY=${AZURE_API_KEY}
+      - AZURE_API_BASE=${AZURE_API_BASE}
+      - AZURE_API_VERSION=${AZURE_API_VERSION}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - mcp_server
+    restart: unless-stopped
+    networks:
+      - agentic_network
+
+volumes:
+  shared_uploads:
+    driver: local
+
+networks:
+  agentic_network:
+    driver: bridge

@@ -1,0 +1,137 @@
+
+data/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Compiled source code artifacts
+*.class
+*.o
+*.so
+
+# Temporary files
+*.log
+*.temp
+*.tmp
+*.bak
+*.swp
+
+# Package managers
+node_modules/
+*.gem
+*.egg-info/
+.Pipfile
+Pipfile.lock
+yarn.lock
+
+# Python virtual environments
+.venv/
+ENV/
+env.bak/
+
+# C/C++ binaries
+*.out
+*.exe
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+
+# MATLAB
+*.m~
+*.mat
+*.mex*
+*.mxheap
+
+# Julia
+.julia/
+*.jl.cov
+
+# Data files
+*.xls
+*.xlsx
+*.hdf5
+*.h5
+*.sqlite
+
+# Machine learning artifacts
+model/
+*.ckpt
+*.h5
+
+# AWS configs and keys (Make sure to manage these securely!)
+*.pem
+*.key
+.aws/
+.aws/credentials
+
+# Config files
+*.env
+.env.local
+*.ini
+
+# JetBrains IDEs
+.idea/
+*.iml
+
+# Text editors
+.vscode/
+.*~
+
+# Generated documentation
+*.pdf
+
+# JavaScript/TypeScript
+dist/
+.build/
+*.min.js
+*.min.css
+
+# LaTeX
+*.aux
+*.bbl
+*.blg
+*.brf
+*.idx
+*.ilg
+*.ind
+*.lof
+*.log
+*.lot
+*.nav
+*.out
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+
+# Miscellaneous files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+s_elongatus_case_study/ 
+.coverage
+htmlcov/
+
+# Tool caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.deepeval/
+
+# Runtime app data (volume-mounted; not committed)
+data/app_data/
+
+# Docker build artifacts / legacy
+ADEPT/ptmdiscoverer-src/

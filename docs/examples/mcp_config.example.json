@@ -1,0 +1,17 @@
+{
+    "mcpServers": {
+        "ptmdiscoverer": {
+            "command": "uv",
+            "args": [
+                "run",
+                "--extra",
+                "mcp",
+                "ptmdiscoverer-mcp"
+            ],
+            "env": {
+                "OPENAI_API_KEY": "<your-api-key>",
+                "OPENAI_BASE_URL": "https://api.openai.com/v1"
+            }
+        }
+    }
+}

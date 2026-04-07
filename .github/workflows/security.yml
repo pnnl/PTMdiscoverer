@@ -1,0 +1,49 @@
+name: Security scan
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+  schedule:
+    # Full re-scan every Monday at 03:00 UTC.
+    - cron: "0 3 * * 1"
+
+jobs:
+  # ── Secrets scan ───────────────────────────────────────────────────────────
+  # TruffleHog scans for verified secrets (live credentials) in every commit
+  # diff.  On push/PR it checks the changed commits; on schedule it scans the
+  # full history.  --only-verified suppresses unverified / low-confidence hits.
+  trufflehog:
+    name: Secret scan (TruffleHog)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified
+
+  # ── SAST / policy check ────────────────────────────────────────────────────
+  # Zizmor audits the GitHub Actions workflow files themselves for security
+  # misconfigurations (script injection, excessive permissions, etc.).
+  zizmor:
+    name: GitHub Actions audit (zizmor)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Run zizmor
+        uses: woodruffw/zizmor-action@v1
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,67 @@
+# streamlit_app.Dockerfile
+# Stage 1: Builder
+FROM python:3.11-slim-bookworm AS builder
+
+# Create the non-root user and group in the final stage
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+
+# Explicitly set HOME for the appuser to a writable directory, make user permission sticky
+ENV HOME=/app
+RUN mkdir -p ${HOME} && chown -R appuser:appgroup ${HOME} && chmod g+s ${HOME}
+WORKDIR ${HOME}
+
+# Install build essentials needed for some dependencies (like gemmi)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends build-essential && \
+    rm -rf /var/lib/apt/lists/*
+
+
+# Copy only necessary files for dependency installation to leverage Docker cache
+COPY pyproject.toml uv.lock* ./
+
+# Copy all package source (ptmdiscoverer + agentic_framework_pkg both live under src/)
+COPY src/ ./src/
+
+# Increase HTTP timeout for uv to handle slower network or larger packages
+ENV UV_HTTP_TIMEOUT=300
+
+# Install uv and create a virtual environment.
+RUN pip install --no-cache-dir uv
+RUN uv venv -p 3.11 && uv pip install --no-cache-dir --editable ".[adept]"
+
+
+# Stage 2: Final image
+FROM python:3.11-slim-bookworm AS final
+
+# Create the non-root user and group in the final stage
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+
+# Explicitly set HOME for the appuser to a writable directory, make user permission sticky
+ENV HOME=/app
+RUN mkdir -p ${HOME} && chown -R appuser:appgroup ${HOME} && chmod g+s ${HOME}
+WORKDIR ${HOME}
+
+
+# Copy the uv executables and other necessary files from the builder stage
+COPY --from=builder /app/.venv ./.venv/
+# Copy the uv executable from the builder stage to a directory on PATH in the final stage
+COPY --from=builder /usr/local/bin/uv /usr/local/bin/uv
+COPY --from=builder /app/src/ ./src/
+COPY --from=builder /app/pyproject.toml ./pyproject.toml
+# .env is NOT copied into the image; secrets come from docker-compose env vars
+COPY --from=builder /app/uv.lock* ./
+
+
+RUN mkdir -p /app/data/temp_uploads 
+
+ENV UV_CACHE_DIR=/tmp/.uv_cache_appuser_runtime
+RUN mkdir -p ${UV_CACHE_DIR} && chown -R appuser:appgroup ${UV_CACHE_DIR}
+
+RUN chown -R appuser:appgroup ${HOME}
+
+USER appuser
+WORKDIR ${HOME}
+
+EXPOSE 8501
+
+CMD ["uv", "run", "run-streamlit-harness"]

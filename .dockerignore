@@ -1,0 +1,51 @@
+# Root-level .dockerignore used when docker-compose build context is the repo root (..)
+# Keep the build context small: only src/, pyproject.toml, and ADEPT/src/, ADEPT/pyproject.toml
+# are needed by the Dockerfiles.
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# VCS
+.git/
+.gitignore
+
+# Test artifacts
+.pytest_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+*.log
+
+# Secrets — never bake into image
+.env
+*.env
+
+# Large runtime/data directories (all volume-mounted at runtime)
+data/app_data/
+ADEPT/data/
+ADEPT/data/
+ADEPT/ptmdiscoverer-src/
+
+# ADEPT test files (not needed in image)
+ADEPT/tests/
+tests/
+
+# Docs
+docs/
+
+# IDE
+.vscode/
+.idea/
+
+# SQLite databases
+*.sqlite3
+*.db

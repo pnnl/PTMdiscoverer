@@ -1,0 +1,281 @@
+import os
+from typing import Any, cast
+
+# Langchain imports
+from langchain_classic.agents import AgentExecutor, create_openai_tools_agent
+from langchain_core.callbacks.base import (
+    BaseCallbackHandler,
+)  # Import for type hinting callbacks
+from langchain_core.messages import (
+    AIMessage,
+    BaseMessage,
+    HumanMessage,
+)
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_openai import (
+    AzureChatOpenAI,
+    ChatOpenAI,
+)
+from pydantic import SecretStr
+
+from ..logger_config import get_logger  # Use centralized logger
+from .mcp_langchain_tools import (
+    get_mcp_blastn_biopython_tool_langchain,  # Import Biopython BLASTN tool
+    get_mcp_blastp_biopython_tool_langchain,  # Import Biopython BLASTP tool
+    get_mcp_get_pubchem_compound_properties_tool_langchain,  # Import PubChem properties tool factory
+    get_mcp_list_uploaded_files_tool_langchain,  # Import new tool for listing files
+    get_mcp_perform_calculation_tool_langchain,
+    get_mcp_query_csv_tool_langchain,
+    get_mcp_query_uniprot_tool_langchain,
+    get_mcp_retrieve_notes_tool_langchain,
+    get_mcp_search_pubchem_by_name_tool_langchain,  # Import PubChem search tool factory
+    get_mcp_store_note_tool_langchain,
+    get_mcp_web_search_tool_langchain,
+)
+from .ptm_langchain_tools import (
+    get_ptm_analyze_run_results_langchain,
+    get_ptm_extract_delta_masses_langchain,
+    get_ptm_get_run_results_langchain,
+    get_ptm_list_proteins_langchain,
+    get_ptm_run_inference_langchain,
+    get_ptm_validate_study_folder_langchain,
+)
+
+# Configure logging
+logger = get_logger(__name__)
+
+
+class ScientificWorkflowAgent:
+    def __init__(self, mcp_session_id: str | None = None):
+        self.mcp_session_id = mcp_session_id  # Crucial for stateful MCP tool calls
+
+        self.llm: ChatOpenAI | AzureChatOpenAI | None = None
+        self.llm_model_name = os.getenv("LANGCHAIN_LLM_MODEL")  # User-specified model or Azure deployment
+
+        # Fetch LLM configuration from environment variables
+        internal_llm_api_key = os.getenv("INTERNAL_LLM_API_KEY")
+        internal_llm_base_url = os.getenv("INTERNAL_LLM_BASE_URL")
+        internal_llm_model = os.getenv("INTERNAL_LLM_MODEL")
+
+        azure_api_base = os.getenv("AZURE_API_BASE", None)
+        azure_api_key = os.getenv("AZURE_API_KEY", None)
+        azure_api_version = os.getenv("AZURE_API_VERSION", None)
+
+        openai_api_key = os.getenv("OPENAI_API_KEY", None)
+
+        initialized_llm = False
+
+        # Check for internal LLM provider FIRST (highest priority)
+        if internal_llm_api_key and internal_llm_base_url and internal_llm_model:
+            logger.info(f"Using internal LLM provider: {internal_llm_base_url} with model {internal_llm_model}")
+
+            # Reasoning models need higher max_tokens for internal reasoning + response
+            max_tokens = 4000 if "o4-mini" in internal_llm_model or "o3-mini" in internal_llm_model else 1000
+
+            try:
+                self.llm = cast(Any, ChatOpenAI)(
+                    model=internal_llm_model,
+                    api_key=SecretStr(internal_llm_api_key),
+                    base_url=internal_llm_base_url,
+                    max_tokens=max_tokens,
+                )
+                logger.info("Internal LLM provider initialized successfully.")
+                initialized_llm = True
+            except Exception as e:
+                logger.error(f"Failed to initialize internal LLM provider: {e}", exc_info=True)
+                # Don't raise here, allow fallback to cloud providers
+
+        # Try Azure OpenAI if internal LLM not configured or failed
+        if not initialized_llm and azure_api_base and azure_api_key and azure_api_version:
+            if not self.llm_model_name:
+                logger.warning(
+                    "Azure OpenAI environment variables (AZURE_API_BASE, AZURE_API_KEY, AZURE_API_VERSION) are set, "
+                    "but LANGCHAIN_LLM_MODEL (which should be the Azure deployment name) is missing. Skipping Azure OpenAI."
+                )
+            else:
+                logger.info(
+                    f"Attempting to initialize AzureChatOpenAI with deployment: {self.llm_model_name} and API version: {azure_api_version}"
+                )
+                logger.info(f"Using Azure API base: {azure_api_base} and key len: {len(azure_api_key)}")
+                try:
+                    self.llm = AzureChatOpenAI(
+                        azure_deployment=self.llm_model_name,
+                        api_version=azure_api_version,
+                        azure_endpoint=azure_api_base,
+                        api_key=SecretStr(azure_api_key),
+                    )
+                    logger.info("AzureChatOpenAI initialized successfully.")
+                    initialized_llm = True
+                except Exception as e:
+                    logger.error(f"Failed to initialize AzureChatOpenAI: {e}", exc_info=True)
+                    # Don't raise here, allow fallback to standard OpenAI if configured
+
+        # If Azure not configured or failed, try standard OpenAI
+        if not initialized_llm and openai_api_key:
+            current_model_to_use = self.llm_model_name if self.llm_model_name else "gpt-3.5-turbo"
+            logger.info(f"Attempting to initialize ChatOpenAI with model: {current_model_to_use}")
+            try:
+                self.llm = ChatOpenAI(
+                    model=current_model_to_use,  # Use 'model' parameter for ChatOpenAI
+                    api_key=SecretStr(openai_api_key),
+                    temperature=0,  # Standard OpenAI models generally support temperature
+                )
+                logger.info("ChatOpenAI initialized successfully.")
+                initialized_llm = True
+            except Exception as e:
+                logger.error(f"Failed to initialize ChatOpenAI: {e}", exc_info=True)
+                # Don't raise here yet, final check below
+
+        if not initialized_llm:
+            error_msg = (
+                "LLM configuration is missing or incomplete. Please set environment variables for either Azure OpenAI "
+                "(AZURE_API_BASE, AZURE_API_KEY, AZURE_API_VERSION, and LANGCHAIN_LLM_MODEL for Azure deployment name) "
+                "or standard OpenAI (OPENAI_API_KEY, and optionally LANGCHAIN_LLM_MODEL)."
+            )
+            logger.error(error_msg)
+            raise ValueError(error_msg)
+
+        agent_session_id = self.mcp_session_id  # The agent's session ID for tool fallbacks
+
+        self.tools = [
+            get_mcp_query_csv_tool_langchain(mcp_session_id=agent_session_id),
+            get_mcp_perform_calculation_tool_langchain(mcp_session_id=agent_session_id),
+            get_mcp_store_note_tool_langchain(mcp_session_id=agent_session_id),
+            get_mcp_retrieve_notes_tool_langchain(mcp_session_id=agent_session_id),
+            get_mcp_query_uniprot_tool_langchain(mcp_session_id=agent_session_id),
+            get_mcp_web_search_tool_langchain(mcp_session_id=agent_session_id),
+            get_mcp_blastp_biopython_tool_langchain(mcp_session_id=agent_session_id),
+            get_mcp_blastn_biopython_tool_langchain(mcp_session_id=agent_session_id),
+            get_mcp_search_pubchem_by_name_tool_langchain(mcp_session_id=agent_session_id),
+            get_mcp_get_pubchem_compound_properties_tool_langchain(mcp_session_id=agent_session_id),
+            get_mcp_list_uploaded_files_tool_langchain(mcp_session_id=agent_session_id),
+            get_ptm_validate_study_folder_langchain(mcp_session_id=agent_session_id),
+            get_ptm_list_proteins_langchain(mcp_session_id=agent_session_id),
+            get_ptm_extract_delta_masses_langchain(mcp_session_id=agent_session_id),
+            get_ptm_run_inference_langchain(mcp_session_id=agent_session_id),
+            get_ptm_get_run_results_langchain(mcp_session_id=agent_session_id),
+            get_ptm_analyze_run_results_langchain(mcp_session_id=agent_session_id),
+        ]
+
+        # Define the prompt for the agent
+        # The system message guides the LLM on its role, how to use tools,
+        # and specifically how to include the mcp_session_id in tool calls.
+        # Construct the example JSON string with properly escaped braces for the prompt template
+        example_session_id_for_json_example = self.mcp_session_id or "YOUR_CURRENT_SESSION_ID"
+        # This will result in a string like: {{ "note_text": "my important note", "mcp_session_id": "actual_id_or_placeholder" }}
+        # which Langchain will render as a literal JSON example for the LLM.
+        example_json_str_for_prompt = (
+            f'{{{{ "note_text": "my important note", "mcp_session_id": "{example_session_id_for_json_example}" }}}}'
+        )
+
+        system_prompt_message = (
+            "You are a helpful scientific workflow assistant. "
+            "You have access to several tools to help answer user queries and perform tasks. "
+            "These tools allow you to perform calculations, manage notes, search the web, query UniProt, "
+            "search PubChem for chemical compounds (SearchPubChemByName), retrieve detailed compound properties by CID (GetPubChemCompoundProperties), "
+            # "search PubChem for chemical compounds using generic query terms (SearchPubChemQueryInput) if the other PubChem tools fail; "
+            "perform protein (PerformProteinBlastSearchBiopython) and nucleotide (PerformNucleotideBlastSearchBiopython) sequence searches using Biopython; "
+            "run Post-Translational Modification (PTM) discovery workflows using PTMdiscoverer tools: "
+            "validate a study folder (PTMValidateStudyFolder), list proteins in a study (PTMListProteins), extract delta-mass data (PTMExtractDeltaMasses), "
+            "run LLM-based PTM inference (PTMRunInference), retrieve prediction results (PTMGetRunResults), and analyze completed runs deterministically (PTMAnalyzeRunResults); "
+            "PTM study folders live under 'ptm_studies/' on the server (e.g. 'ptm_studies/s_elongatus'). "
+            "Always pass study_folder as a path relative to that base, such as 'ptm_studies/s_elongatus'. "
+            "retrieve information from uploaded documents (CSVs, PDFs, DOCX, images, TXT, TEX) once they are processed and have a file_id (QueryProcessedDocumentData), and list previously uploaded and processed files (ListUploadedFiles). "
+            "If there are processed files available, you can use the QueryProcessedDocumentData tool to query processed files. "
+            "When you use a tool that requires a session context (like storing notes or querying user-specific CSV data), "
+            "you MUST include the 'mcp_session_id' in the tool's input parameters. "
+            "The current MCP session ID is: {mcp_session_id_for_prompt}. "
+            f"For example, if you use the 'StoreNoteInSession' tool, your input should be a JSON like: {example_json_str_for_prompt}. "
+            "Always provide the `mcp_session_id` when the tool's description or input schema indicates it is needed for session context."
+        )
+
+        prompt_template = ChatPromptTemplate.from_messages(
+            [
+                ("system", system_prompt_message),
+                MessagesPlaceholder(variable_name="chat_history", optional=True),
+                ("human", "{input}"),
+                MessagesPlaceholder(variable_name="agent_scratchpad"),
+            ]
+        )
+
+        assert self.llm is not None
+        self.agent = create_openai_tools_agent(self.llm, self.tools, prompt_template)
+        self.agent_executor = AgentExecutor(
+            agent=self.agent,
+            tools=self.tools,
+            verbose=True,
+            handle_parsing_errors=True,
+        )
+
+    async def arun(
+        self,
+        user_input: str,
+        chat_history: list[dict[str, str]] | None = None,
+        callbacks: list[BaseCallbackHandler] | None = None,
+    ) -> dict[str, Any]:
+        """
+        Runs the agent with the given user input and optional chat history.
+        The mcp_session_id is passed implicitly via the agent's initialization or needs to be part of the input.
+        """
+        current_chat_history: list[BaseMessage] = []
+        if chat_history:
+            for msg in chat_history:
+                if msg.get("role") == "user":
+                    current_chat_history.append(HumanMessage(content=msg.get("content", "")))
+                elif msg.get("role") == "assistant":
+                    current_chat_history.append(AIMessage(content=msg.get("content", "")))
+
+        # The `mcp_session_id_for_prompt` is used to format the system message.
+        # The actual `mcp_session_id` is expected by the tools' Pydantic models.
+        # The system prompt instructs the LLM to include `mcp_session_id: self.mcp_session_id`
+        # in the JSON it generates for tool calls.
+        agent_input_dict = {
+            "input": user_input,
+            "chat_history": current_chat_history,
+            "mcp_session_id_for_prompt": self.mcp_session_id or "N/A (no active session provided to agent)",
+        }
+
+        # If tools expect mcp_session_id directly in their input dict (as per Pydantic models),
+        # the LLM needs to be prompted to include it. The system message above tries to do this.
+        # The `MCPToolWrapper` will then extract it if present in `tool_input`.
+
+        logger.info(f"Running Langchain agent for session {self.mcp_session_id} with input: {user_input}")
+        try:
+            # Pass callbacks to agent_executor.ainvoke
+            response = await self.agent_executor.ainvoke(
+                agent_input_dict,
+                config={"callbacks": callbacks},
+            )
+            response_dict = dict(response)
+            # Normalize the output: some LLM providers return structured content
+            # blocks ([{'type': 'text', 'text': '...'}]) instead of a plain string.
+            raw_output = response_dict.get("output")
+            if not isinstance(raw_output, str):
+                if isinstance(raw_output, list):
+                    response_dict["output"] = "".join(
+                        item.get("text", str(item)) if isinstance(item, dict) else str(item) for item in raw_output
+                    )
+                elif raw_output is not None:
+                    response_dict["output"] = str(raw_output)
+            normalized_output = response_dict.get("output")
+            if isinstance(normalized_output, str):
+                if normalized_output.strip():
+                    logger.info(
+                        "Langchain agent completed for session %s with final output length %d",
+                        self.mcp_session_id,
+                        len(normalized_output),
+                    )
+                else:
+                    logger.warning(
+                        "Langchain agent completed for session %s with an empty final output. Response keys: %s",
+                        self.mcp_session_id,
+                        sorted(response_dict.keys()),
+                    )
+            return response_dict
+        except Exception as e:
+            logger.error(
+                f"Error running Langchain agent for session {self.mcp_session_id}: {e}",
+                exc_info=True,
+            )
+            # If you have a callback handler for errors, it might have already logged this.
+            return {"output": f"An error occurred: {e}"}

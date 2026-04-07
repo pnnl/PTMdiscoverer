@@ -1,0 +1,51 @@
+# mcp_server.Dockerfile
+FROM python:3.11-slim-bookworm AS base
+
+# Create the non-root user and group in the final stage
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+
+# Explicitly set HOME for the appuser to a writable directory, make user permission sticky
+ENV HOME=/app
+RUN mkdir -p ${HOME} && chown -R appuser:appgroup ${HOME} && chmod g+s ${HOME}
+WORKDIR ${HOME}
+
+# Stage 1: Builder stage
+# Install system dependencies needed for some Python packages (like build-essential for gemmi)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    chromium \
+    chromium-driver && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set Chrome environment variables for headless operation
+ENV CHROME_BIN=/usr/bin/chromium
+ENV CHROMEDRIVER_PATH=/usr/bin/chromedriver
+
+
+# Copy only necessary files for dependency installation to leverage Docker cache
+COPY pyproject.toml uv.lock* ./
+
+# Copy all package source (ptmdiscoverer + agentic_framework_pkg both live under src/)
+COPY src/ ./src/
+
+# Install dependencies using uv — single editable install pulls in [adept] extras
+# which transitively installs ptmdiscoverer + agentic_framework_pkg + all deps.
+ENV UV_HTTP_TIMEOUT=300
+
+RUN pip install --no-cache-dir uv
+RUN uv venv -p 3.11 && uv pip install --no-cache-dir --editable ".[adept]"
+
+RUN mkdir -p /app/data && mkdir -p /app/shared_uploads /app/data/uploaded_files
+RUN chown -R appuser:appgroup ${HOME} 
+
+ENV UV_CACHE_DIR=/tmp/.uv_cache_appuser_runtime 
+
+RUN mkdir -p ${UV_CACHE_DIR} && chown -R appuser:appgroup ${UV_CACHE_DIR}
+
+USER appuser
+WORKDIR ${HOME}
+
+EXPOSE 8080
+
+CMD ["uv", "run", "run-mcp-server"]
