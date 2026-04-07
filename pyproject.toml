@@ -30,7 +30,7 @@ adept = [
     "fastmcp>=2.6.0",
     "mcp",
     "litellm>=1.83.0",
-    "langchain>=0.3.0,<1.0.0",
+    "langchain>=0.3.0",
     "langchain-openai",
     "langchain-community",
     "streamlit>=1.20.0",
