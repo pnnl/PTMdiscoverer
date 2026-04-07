@@ -2,7 +2,7 @@ import os
 from typing import Any, cast
 
 # Langchain imports
-from langchain_classic.agents import AgentExecutor, create_openai_tools_agent
+from langchain.agents import AgentExecutor, create_openai_tools_agent
 from langchain_core.callbacks.base import (
     BaseCallbackHandler,
 )  # Import for type hinting callbacks

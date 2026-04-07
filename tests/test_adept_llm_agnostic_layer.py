@@ -31,13 +31,9 @@ class TestLLMAgnosticLayerInternalProvider:
             client = LLMAgnosticClient()
 
             # Mock litellm.acompletion to verify it's called
-            with patch(
-                "agentic_framework_pkg.core.llm_agnostic_layer.litellm.acompletion"
-            ) as mock_acompletion:
+            with patch("agentic_framework_pkg.core.llm_agnostic_layer.litellm.acompletion") as mock_acompletion:
                 mock_acompletion.return_value = AsyncMock()
-                mock_acompletion.return_value.choices = [
-                    MagicMock(message=MagicMock(content="Test response"))
-                ]
+                mock_acompletion.return_value.choices = [MagicMock(message=MagicMock(content="Test response"))]
 
                 # Call should use internal LLM
                 try:
@@ -102,9 +98,7 @@ class TestLLMAgnosticLayerInternalProvider:
             client = LLMAgnosticClient()
 
             # When purpose is "embedding", model should be overridden
-            with patch(
-                "agentic_framework_pkg.core.llm_agnostic_layer.litellm.aembedding"
-            ) as mock_aembedding:
+            with patch("agentic_framework_pkg.core.llm_agnostic_layer.litellm.aembedding") as mock_aembedding:
                 mock_aembedding.return_value = AsyncMock()
                 mock_aembedding.return_value.data = [MagicMock(embedding=[0.1])]
 

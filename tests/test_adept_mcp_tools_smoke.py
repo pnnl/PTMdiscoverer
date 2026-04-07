@@ -42,13 +42,9 @@ async def mcp_server_available():
             # 200, 307 (redirect), 406 (not acceptable), 405 (method not allowed) all indicate server is up
             if response.status_code in [200, 307, 405, 406]:
                 return True
-            pytest.skip(
-                f"MCP server returned unexpected status {response.status_code}. Run: docker compose up -d"
-            )
+            pytest.skip(f"MCP server returned unexpected status {response.status_code}. Run: docker compose up -d")
     except httpx.ConnectError as e:
-        pytest.skip(
-            f"Cannot connect to MCP server at {MCP_SERVER_URL}. Is Docker running? Error: {e}"
-        )
+        pytest.skip(f"Cannot connect to MCP server at {MCP_SERVER_URL}. Is Docker running? Error: {e}")
     except Exception as e:
         pytest.skip(f"MCP server check failed: {type(e).__name__}: {e}")
 

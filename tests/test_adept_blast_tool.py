@@ -17,9 +17,7 @@ import pytest
 _state_mgr_mock = MagicMock()
 _state_mgr_mock.create_session_if_not_exists = AsyncMock()
 sys.modules.setdefault("chromadb", MagicMock())
-sys.modules.setdefault(
-    "agentic_framework_pkg.mcp_server.state_manager", _state_mgr_mock
-)
+sys.modules.setdefault("agentic_framework_pkg.mcp_server.state_manager", _state_mgr_mock)
 
 
 # ---------------------------------------------------------------------------
@@ -143,9 +141,7 @@ class TestBlastpSearch:
         with patch.dict(os.environ, {"NCBI_EMAIL": ""}, clear=False):
             # Remove the key entirely so os.environ.get("NCBI_EMAIL") returns None
             os.environ.pop("NCBI_EMAIL", None)
-            result = await blast_tools["perform_blastp_search_biopython"](
-                SAMPLE_SEQUENCE, mock_ctx
-            )
+            result = await blast_tools["perform_blastp_search_biopython"](SAMPLE_SEQUENCE, mock_ctx)
 
         assert "error" in result
         assert "NCBI_EMAIL" in result["error"]
@@ -224,9 +220,7 @@ class TestBlastpSearch:
                 return_value=empty_record,
             ),
         ):
-            result = await blast_tools["perform_blastp_search_biopython"](
-                SAMPLE_SEQUENCE, mock_ctx
-            )
+            result = await blast_tools["perform_blastp_search_biopython"](SAMPLE_SEQUENCE, mock_ctx)
 
         assert result["results"] == []
         assert "no hits" in result.get("message", "").lower()
@@ -238,9 +232,7 @@ class TestBlastpSearch:
             "agentic_framework_pkg.mcp_server.tools.blastq_tool.NCBIWWW.qblast",
             side_effect=RuntimeError("NCBI connection refused"),
         ):
-            result = await blast_tools["perform_blastp_search_biopython"](
-                SAMPLE_SEQUENCE, mock_ctx
-            )
+            result = await blast_tools["perform_blastp_search_biopython"](SAMPLE_SEQUENCE, mock_ctx)
 
         assert "error" in result
         assert "NCBI connection refused" in result["details"]
@@ -285,9 +277,7 @@ class TestBlastnSearch:
                 return_value=fake_record,
             ),
         ):
-            result = await blast_tools["perform_blastn_search_biopython"](
-                "ATGCGATCGATCG", mock_ctx
-            )
+            result = await blast_tools["perform_blastn_search_biopython"]("ATGCGATCGATCG", mock_ctx)
             # Verify default database is "nt"
             call_args = mock_qblast.call_args
             assert call_args[0][1] == "nt"  # second positional arg = database

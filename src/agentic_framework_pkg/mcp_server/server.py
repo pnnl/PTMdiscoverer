@@ -5,7 +5,7 @@ from fastmcp import FastMCP
 # Initialize FastMCP instance
 mcp = FastMCP(
     name=os.getenv("MCP_SERVER_NAME", "AgenticFrameworkMCP"),
-    instructions="This MCP server provides tools for data analysis, general utilities, and scientific workflows."
+    instructions="This MCP server provides tools for data analysis, general utilities, and scientific workflows.",
     # Add other FastMCP configurations if needed, like default_model for ctx.sample
 )
 

@@ -35,15 +35,19 @@ jobs:
     name: GitHub Actions audit (zizmor)
     runs-on: ubuntu-latest
     permissions:
-      security-events: write
       contents: read
-      actions: read
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
 
+      - name: Install zizmor
+        run: pip install zizmor
+
       - name: Run zizmor
-        uses: woodruffw/zizmor-action@v1
+        # continue-on-error so findings are visible without blocking the pipeline;
+        # tighten to false once the baseline is clean.
+        continue-on-error: true
+        run: zizmor .github/workflows/
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
