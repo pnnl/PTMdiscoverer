@@ -1,6 +1,11 @@
 
 # PTMdiscoverer
 
+[![CI](https://github.com/pnnl/PTMdiscoverer/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/pnnl/PTMdiscoverer/actions/workflows/ci.yml)
+[![Security Scan](https://github.com/pnnl/PTMdiscoverer/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/pnnl/PTMdiscoverer/actions/workflows/security.yml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+
+
 PTMdiscoverer performs LLM-assisted PTM hypothesis generation from proteomics study inputs. It identifies delta masses in peptide fragmentation patterns from mass spectrometry data, combines a study-specific base prompt with observed protein-level evidence, and sends those prompts to an OpenAI-compatible LLM for PTM annotation and interpretation. Inference is prompt-based and grounded in the supplied study context and extracted peptide-level delta-mass evidence.
 
 ## Requirements
