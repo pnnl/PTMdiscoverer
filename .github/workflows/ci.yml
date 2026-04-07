@@ -108,7 +108,7 @@ jobs:
         run: uv sync --extra adept --extra mcp
 
       - name: Build documentation
-        run: uv run pdoc --html ptmdiscoverer agentic_framework_pkg --output-dir docs/api --force
+        run: uv run pdoc -o docs/api ptmdiscoverer agentic_framework_pkg
 
       - name: Upload docs artifact
         uses: actions/upload-artifact@v4
