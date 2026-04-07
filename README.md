@@ -15,7 +15,7 @@ LLM-assisted PTM hypothesis generation from proteomics mass spectrometry data. I
 uv sync
 ```
 
-For the ADEPT browser UI and full agentic workflow:
+For the [ADEPT](https://github.com/pnnl/adept-agentic-framework-core) browser UI and full agentic workflow:
 
 ```bash
 uv sync --extra adept
