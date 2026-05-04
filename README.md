@@ -50,3 +50,7 @@ Portions of this work were supported by the Center for AI at PNNL, the NW-BRaVE 
 ## Contact
 
 aivett.bilbao@pnnl.gov · august.george@pnnl.gov
+
+## Citation
+
+Software citation for version 1.0: [https://doi.org/10.5281/zenodo.20030405](https://doi.org/10.5281/zenodo.20030405) 
