@@ -39,7 +39,7 @@ cp .env.template .env   # fill in INTERNAL_LLM_* vars
 ./scripts/start-app.sh  # opens http://localhost:8501
 ```
 
-→ **[Full usage guide](docs/USAGE.md)** — CLI reference, app workflow, data requirements, development setup, and acknowledgements.
+→ **[Full usage guide](docs/USAGE.md)** — CLI reference, app workflow, data requirements, and development setup.
 
 ## Acknowledgements
 
@@ -47,10 +47,14 @@ This research was funded by the Generative AI for Science, Energy, and Security 
 
 Portions of this work were supported by the Center for AI at PNNL, the NW-BRaVE for Biopreparedness project funded by the U.S. Department of Energy (DOE), Office of Science, Biological and Environmental Research program, under FWP 81832, and performed at the Environmental Molecular Sciences Laboratory (EMSL), a DOE Office of Science User Facility sponsored by the Biological and Environmental Research program under Contract No. DE-AC05-76RL01830.
 
+Generative AI tools were used to assist with software development.
+
 ## Contact
 
 aivett.bilbao@pnnl.gov · august.george@pnnl.gov
 
 ## Citation
 
-Software citation for version 1.0: [https://doi.org/10.5281/zenodo.20030405](https://doi.org/10.5281/zenodo.20030405) 
+Software for version 1.0: [https://doi.org/10.5281/zenodo.20030405](https://doi.org/10.5281/zenodo.20030405) 
+
+Preprint: [https://doi.org/10.64898/2026.05.01.722279](https://doi.org/10.64898/2026.05.01.722279)
