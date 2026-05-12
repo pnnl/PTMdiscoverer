@@ -172,12 +172,6 @@ mcp dev src/ptmdiscoverer/mcp_server.py
 
 A sample standalone MCP client config is at `docs/examples/mcp_config.example.json`.
 
-## Acknowledgements
-
-This research was funded by the Generative AI for Science, Energy, and Security Science & Technology Investment under the Laboratory Directed Research and Development Program at Pacific Northwest National Laboratory (PNNL), a multiprogram national laboratory operated by Battelle for the U.S. Department of Energy.
-
-Portions of this work were supported by the Center for AI at PNNL, the NW-BRaVE for Biopreparedness project funded by the U.S. Department of Energy (DOE), Office of Science, Biological and Environmental Research program, under FWP 81832, and performed at the Environmental Molecular Sciences Laboratory (EMSL), a DOE Office of Science User Facility sponsored by the Biological and Environmental Research program under Contract No. DE-AC05-76RL01830.
-
 ## Contact
 
 aivett.bilbao@pnnl.gov · august.george@pnnl.gov
