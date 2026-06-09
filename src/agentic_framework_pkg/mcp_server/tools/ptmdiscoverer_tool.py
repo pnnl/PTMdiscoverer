@@ -78,16 +78,16 @@ def _resolve_study_folder(study_folder: str) -> str:
     """Normalize the study_folder path supplied by the LLM.
 
     The LLM sometimes passes an absolute path that doesn't exist
-    (e.g. '/ptm_studies/s_elongatus') or a wrong relative path.  We
+    (e.g. '/ptm_studies/example_study') or a wrong relative path.  We
     strip any leading '/ptm_studies', '/app', or 'app' prefix and
     re-anchor to _PTM_STUDIES_BASE so simple names like
-    's_elongatus' or 'ptm_studies/s_elongatus' all resolve correctly.
+    'example_study' or 'ptm_studies/example_study' all resolve correctly.
     """
     import re as _re
 
     # Strip common wrong prefixes the LLM tends to emit
     normalized = _re.sub(r"^(/app)?/?(ptm_studies/)?", "", study_folder.lstrip("/"))
-    # normalized is now something like 's_elongatus'
+    # normalized is now something like 'example_study'
     # If it already starts with the base, don't double-add
     candidate = os.path.join(_PTM_STUDIES_BASE, normalized)
     if os.path.isdir(candidate):

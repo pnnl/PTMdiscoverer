@@ -6,8 +6,8 @@
 
 1. `uv` for installation and command execution
 2. An OpenAI-compatible API key in `OPENAI_API_KEY`
-3. Optionally `OPENAI_MODEL` to set the default model for CLI inference
-4. Optionally `OPENAI_BASE_URL` for non-default endpoints
+3. `OPENAI_MODEL` — optional; sets the default model so `--model` does not need to be passed on the command line. Falls back to `gpt-4o` if unset.
+4. `OPENAI_BASE_URL` — optional; override the API endpoint for non-OpenAI providers
 
 Install `uv` if needed:
 
@@ -17,7 +17,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ### Data requirements
 
-PTMdiscoverer expects a study folder containing these inputs:
+PTMdiscoverer expects a study folder containing these inputs (e.g. `tests/fixtures/example_study`):
 
 1. `base_prompt.txt`
 2. `protein_metadata.json`
@@ -34,35 +34,37 @@ Minimum practical rule:
 ```bash
 uv sync
 export OPENAI_API_KEY=your_key
-export OPENAI_MODEL=your-model-name              # e.g. gpt-4o on OpenAI
+export OPENAI_MODEL=your-model-name              # e.g. gpt-4o — also accepted via .env
 export OPENAI_BASE_URL=https://api.openai.com/v1  # optional override
 
 # Validate a study before inference
-uv run ptmdiscoverer validate data/s_elongatus_case_study
+uv run ptmdiscoverer validate tests/fixtures/example_study
 
 # List proteins in a study
-uv run ptmdiscoverer list data/s_elongatus_case_study
+uv run ptmdiscoverer list tests/fixtures/example_study
 
 # Read or extract delta masses for one protein
-uv run ptmdiscoverer extract data/s_elongatus_case_study Q9R6W2
+uv run ptmdiscoverer extract tests/fixtures/example_study P99002
 
 # Run one inference pass
-uv run ptmdiscoverer run data/s_elongatus_case_study --model your-model-name
+# --model is optional when OPENAI_MODEL is set; falls back to gpt-4o if neither is provided
+uv run ptmdiscoverer run tests/fixtures/example_study
+uv run ptmdiscoverer run tests/fixtures/example_study --model your-model-name  # explicit override
 
 # Run multiple passes and aggregate results
-uv run ptmdiscoverer run data/s_elongatus_case_study --n-runs 3 --model your-model-name
+uv run ptmdiscoverer run tests/fixtures/example_study --n-runs 3
 
 # Inspect completed runs
-uv run ptmdiscoverer results --study-folder data/s_elongatus_case_study
+uv run ptmdiscoverer results --study-folder tests/fixtures/example_study
 
 # Analyze one completed run
-uv run ptmdiscoverer analyze --run-dir data/s_elongatus_case_study/output/output_<timestamp>
+uv run ptmdiscoverer analyze --run-dir tests/fixtures/example_study/output/output_<timestamp>
 
 # Analyze an aggregated multi-run results CSV
-uv run ptmdiscoverer analyze --aggregated-csv data/s_elongatus_case_study/output/aggregated_predictions_<timestamp>.csv
+uv run ptmdiscoverer analyze --aggregated-csv tests/fixtures/example_study/output/aggregated_predictions_<timestamp>.csv
 ```
 
-Model names are provider-specific. All CLI commands print structured JSON.
+Model resolution order for `run`: `--model` flag → `OPENAI_MODEL` env var → `gpt-4o` default. All CLI commands print structured JSON.
 
 ### `analyze` output
 
@@ -120,19 +122,19 @@ Open `http://localhost:8501` and refer to studies as `ptm_studies/<study_name>`.
 **Example prompts:**
 
 ```text
-Validate the study folder ptm_studies/s_elongatus, list the proteins, and extract delta masses for Q9R6W2.
+Validate the study folder ptm_studies/example_study, list the proteins, and extract delta masses for P99002.
 ```
 
 ```text
-Run one PTM inference pass for ptm_studies/s_elongatus with model your-model-name and report the run directory that was created.
+Run one PTM inference pass for ptm_studies/example_study with model your-model-name and report the run directory that was created.
 ```
 
 ```text
-Analyze the completed PTM run in ptm_studies/s_elongatus/output/output_<timestamp> and summarize the key findings.
+Analyze the completed PTM run in ptm_studies/example_study/output/output_<timestamp> and summarize the key findings.
 ```
 
 ```text
-Analyze the aggregated CSV ptm_studies/s_elongatus/output/aggregated_predictions_<timestamp>.csv and tell me which proteins have the most focused signal and which sites show competing PTM identities across runs.
+Analyze the aggregated CSV ptm_studies/example_study/output/aggregated_predictions_<timestamp>.csv and tell me which proteins have the most focused signal and which sites show competing PTM identities across runs.
 ```
 
 ## Input processing details

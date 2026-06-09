@@ -23,14 +23,20 @@ uv sync --extra adept
 
 ## Quick start
 
+Using PTMdiscoverer's validate, run, and analyze commands on example test data:
 ```bash
 export OPENAI_API_KEY=your_key
-export OPENAI_MODEL=gpt-4o          # any OpenAI-compatible model name
+export OPENAI_MODEL=your_model_name
+export OPENAI_BASE_URL=your_base_url 
 
-uv run ptmdiscoverer validate data/my_study
-uv run ptmdiscoverer run     data/my_study --model gpt-4o
-uv run ptmdiscoverer analyze --run-dir data/my_study/output/output_<timestamp>
+uv run ptmdiscoverer validate tests/fixtures/example_study
+
+uv run ptmdiscoverer run     tests/fixtures/example_study  
+
+uv run ptmdiscoverer analyze --run-dir tests/fixtures/example_study/output/output_<timestamp>
 ```
+note: the environment variables can also be set in a .env file instead of exported directly. 
+See the `env.template`
 
 For the browser UI:
 
@@ -39,7 +45,7 @@ cp .env.template .env   # fill in INTERNAL_LLM_* vars
 ./scripts/start-app.sh  # opens http://localhost:8501
 ```
 
-→ **[Full usage guide](docs/USAGE.md)** — CLI reference, app workflow, data requirements, and development setup.
+→ **[Full usage guide](docs/USAGE.md)** — CLI reference, app workflow, data requirements, and development setup. Also see the  **[API docs](docs/api)**
 
 ## Acknowledgements
 

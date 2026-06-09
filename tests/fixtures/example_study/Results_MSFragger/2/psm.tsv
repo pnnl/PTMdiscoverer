@@ -1,0 +1,5 @@
+Spectrum	Peptide	Charge	Retention	Calculated Peptide Mass	Calculated M/Z	Delta Mass	Best Positions	Number Best Positions	Ions Best Position	Ions Second Best Position	Score Best Position	Score Second Best Position	Probability	Number of Missed Cleavages	Protein Start	Is Unique	Protein ID
+ExmplRun2.00101.00101.2	AVMGDLTPK	2	313.1	851.471	426.742	15.994	M3	1	13	3	31.8	7.1	0.98	0	51	True	P99002
+ExmplRun2.00201.00201.2	STLQEIPVR	2	411.5	1042.559	521.786	79.967	S1	1	17	5	40.5	9.8	0.99	0	101	True	P99002
+ExmplRun2.00901.00901.3	IPLVNGTASAK	3	490.5	1155.667	386.229	14.016	T8	1	11	2	23.5	5.0	0.96	0	271	True	P99002
+ExmplRun2.01001.01001.2	SVTMEPQAK	2	520.2	976.455	489.234	15.995	M5	2	14	10	30.0	8.0	0.97	0	161	True	P99002

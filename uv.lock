@@ -2703,7 +2703,7 @@ wheels = [
 
 [[package]]
 name = "litellm"
-version = "1.82.4"
+version = "1.88.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -2719,9 +2719,9 @@ dependencies = [
     { name = "tiktoken" },
     { name = "tokenizers" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e6/79/b492be13542aebd62aafc0490e4d5d6e8e00ce54240bcabf5c3e46b1a49b/litellm-1.82.4.tar.gz", hash = "sha256:9c52b1c0762cb0593cdc97b26a8e05004e19b03f394ccd0f42fac82eff0d4980", size = 17378196 }
+sdist = { url = "https://files.pythonhosted.org/packages/9b/8c/6cfce5d15554e076b8438a955436e9e6e2a2bd39c76539656c1c3861c369/litellm-1.88.0.tar.gz", hash = "sha256:4ff794493e40bd86c6f13e91dcb3e1aad697403fd46a96902196d93356ba48f4", size = 13886026 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ec/ad/7eaa1121c6b191f2f5f2e8c7379823ece6ec83741a4b3c81b82fe2832401/litellm-1.82.4-py3-none-any.whl", hash = "sha256:d37c34a847e7952a146ed0e2888a24d3edec7787955c6826337395e755ad5c4b", size = 15559801 },
+    { url = "https://files.pythonhosted.org/packages/da/71/deb6637475253b83eb4577c058863eec4b4ddaef2d08dcd93981b1aa4209/litellm-1.88.0-py3-none-any.whl", hash = "sha256:abd3037e0bf5703f833f5565c87bdfd93578d3de46cbcb36dfa108c3ef58021c", size = 15276203 },
 ]
 
 [[package]]
@@ -4296,10 +4296,10 @@ requires-dist = [
     { name = "hdf5plugin", marker = "extra == 'notebook'", specifier = ">=5.1.0" },
     { name = "ipykernel", marker = "extra == 'notebook'", specifier = ">=6.29.5" },
     { name = "jupyterlab", marker = "extra == 'notebook'", specifier = ">=4.4.7" },
-    { name = "langchain", marker = "extra == 'adept'", specifier = ">=0.3.0,<1.0.0" },
+    { name = "langchain", marker = "extra == 'adept'", specifier = ">=0.3.0" },
     { name = "langchain-community", marker = "extra == 'adept'" },
     { name = "langchain-openai", marker = "extra == 'adept'" },
-    { name = "litellm", marker = "extra == 'adept'", specifier = ">=1.15.0" },
+    { name = "litellm", marker = "extra == 'adept'", specifier = ">=1.83.0" },
     { name = "matplotlib", specifier = ">=3.10.6" },
     { name = "matplotlib", marker = "extra == 'notebook'", specifier = ">=3.10.6" },
     { name = "mcp", marker = "extra == 'adept'" },

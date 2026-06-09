@@ -144,16 +144,16 @@ duplicated here.</p>
 </span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Normalize the study_folder path supplied by the LLM.</span>
 </span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a>
 </span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a><span class="sd">    The LLM sometimes passes an absolute path that doesn&#39;t exist</span>
-</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a><span class="sd">    (e.g. &#39;/ptm_studies/s_elongatus&#39;) or a wrong relative path.  We</span>
+</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a><span class="sd">    (e.g. &#39;/ptm_studies/example_study&#39;) or a wrong relative path.  We</span>
 </span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a><span class="sd">    strip any leading &#39;/ptm_studies&#39;, &#39;/app&#39;, or &#39;app&#39; prefix and</span>
 </span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a><span class="sd">    re-anchor to _PTM_STUDIES_BASE so simple names like</span>
-</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a><span class="sd">    &#39;s_elongatus&#39; or &#39;ptm_studies/s_elongatus&#39; all resolve correctly.</span>
+</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a><span class="sd">    &#39;example_study&#39; or &#39;ptm_studies/example_study&#39; all resolve correctly.</span>
 </span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a><span class="sd">    &quot;&quot;&quot;</span>
 </span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>    <span class="kn">import</span><span class="w"> </span><span class="nn">re</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_re</span>
 </span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>
 </span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>    <span class="c1"># Strip common wrong prefixes the LLM tends to emit</span>
 </span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>    <span class="n">normalized</span> <span class="o">=</span> <span class="n">_re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^(/app)?/?(ptm_studies/)?&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">study_folder</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">))</span>
-</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>    <span class="c1"># normalized is now something like &#39;s_elongatus&#39;</span>
+</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>    <span class="c1"># normalized is now something like &#39;example_study&#39;</span>
 </span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>    <span class="c1"># If it already starts with the base, don&#39;t double-add</span>
 </span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>    <span class="n">candidate</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_PTM_STUDIES_BASE</span><span class="p">,</span> <span class="n">normalized</span><span class="p">)</span>
 </span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">candidate</span><span class="p">):</span>

@@ -1,0 +1,15 @@
+{
+    "version": 1,
+    "proteins": [
+        {
+            "uniprot_id": "P99001",
+            "name": "Example Metabolic Enzyme A",
+            "delta_mass_file": "P99001_delta-masses.csv"
+        },
+        {
+            "uniprot_id": "P99002",
+            "name": "Example Regulatory Protein B",
+            "delta_mass_file": ""
+        }
+    ]
+}

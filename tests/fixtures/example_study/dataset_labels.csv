@@ -1,0 +1,3 @@
+MSRUNID,LABELSAMPLEGROUP,MSRUN,Phenotype
+1,control,ExampleStudy_Run1_Control_DDA,Baseline condition
+2,treatment,ExampleStudy_Run2_Treatment_DDA,Stimulus condition
