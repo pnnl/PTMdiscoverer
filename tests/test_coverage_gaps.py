@@ -8,11 +8,18 @@ from __future__ import annotations
 
 import io
 import json
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any, cast
 
 import pandas as pd
 import pytest
+from conftest import make_test_study
+
+import ptmdiscoverer.cli as _cli
+from ptmdiscoverer.inference import InferenceContext, assess_study_folder, process_protein, run_inference
+from ptmdiscoverer.utils import augment_protein_positions
 
 # ---------------------------------------------------------------------------
 # reporting — _json_default, resolve_analysis_input, load_run_predictions,
@@ -122,21 +129,12 @@ def test_load_aggregated_predictions_empty_raises(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-import io as _io
-import json as _json
-from contextlib import redirect_stderr, redirect_stdout
-from typing import Any, cast
-
-import ptmdiscoverer.cli as _cli
-from conftest import make_test_study
-
-
 def _run_cli(args: list[str]) -> tuple[int, dict[str, Any], str]:
-    stdout_buf = _io.StringIO()
-    stderr_buf = _io.StringIO()
+    stdout_buf = io.StringIO()
+    stderr_buf = io.StringIO()
     with redirect_stdout(stdout_buf), redirect_stderr(stderr_buf):
         exit_code = _cli.main(args)
-    return exit_code, cast(dict[str, Any], _json.loads(stdout_buf.getvalue())), stderr_buf.getvalue()
+    return exit_code, cast(dict[str, Any], json.loads(stdout_buf.getvalue())), stderr_buf.getvalue()
 
 
 @pytest.mark.unit
@@ -203,8 +201,6 @@ def test_cli_results_run_dir_missing(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 # utils — augment_protein_positions edge branches
 # ---------------------------------------------------------------------------
-
-from ptmdiscoverer.utils import augment_protein_positions
 
 
 @pytest.mark.unit
@@ -281,8 +277,6 @@ def test_augment_non_numeric_positions_in_protein_does_not_raise() -> None:
 # inference — assess_study_folder error branches, run_inference API key check
 # ---------------------------------------------------------------------------
 
-from ptmdiscoverer.inference import InferenceContext, assess_study_folder, process_protein
-
 
 @pytest.mark.unit
 def test_assess_study_folder_bad_metadata_json(tmp_path: Path) -> None:
@@ -311,8 +305,6 @@ def test_run_inference_raises_system_exit_when_no_api_key(tmp_path: Path, monkey
     """run_inference with no client and no OPENAI_API_KEY raises SystemExit.
     Requires a valid study folder since validate_study_folder runs first.
     """
-    from ptmdiscoverer.inference import run_inference
-
     # Minimal valid study so validate_study_folder passes
     (tmp_path / "base_prompt.txt").write_text("p", encoding="utf-8")
     (tmp_path / "protein_metadata.json").write_text(
