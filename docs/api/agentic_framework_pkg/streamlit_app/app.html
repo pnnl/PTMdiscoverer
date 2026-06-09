@@ -597,21 +597,22 @@
 
             <div class="docstring"><p>Run when LLM starts running.</p>
 
-<p>!!! warning</p>
+<div class="alert warning">
 
-<pre><code>This method is called for non-chat models (regular text completion LLMs). If
-you're implementing a handler for a chat model, you should use
-`on_chat_model_start` instead.
-</code></pre>
+<p>This method is called for non-chat models (regular LLMs). If you're
+implementing a handler for a chat model, you should use
+<code><a href="#StreamlitThoughtsCallbackHandler.on_chat_model_start">on_chat_model_start</a></code> instead.</p>
+
+</div>
 
 <p>Args:
-    serialized: The serialized LLM.
-    prompts: The prompts.
-    run_id: The ID of the current run.
-    parent_run_id: The ID of the parent run.
-    tags: The tags.
-    metadata: The metadata.
-    **kwargs: Additional keyword arguments.</p>
+    serialized (dict[str, Any]): The serialized LLM.
+    prompts (list[str]): The prompts.
+    run_id (UUID): The run ID. This is the ID of the current run.
+    parent_run_id (UUID): The parent run ID. This is the ID of the parent run.
+    tags (Optional[list[str]]): The tags.
+    metadata (Optional[dict[str, Any]]): The metadata.
+    kwargs (Any): Additional keyword arguments.</p>
 </div>
 
 
@@ -650,10 +651,10 @@ you're implementing a handler for a chat model, you should use
             <div class="docstring"><p>Run on agent action.</p>
 
 <p>Args:
-    action: The agent action.
-    run_id: The ID of the current run.
-    parent_run_id: The ID of the parent run.
-    **kwargs: Additional keyword arguments.</p>
+    action (AgentAction): The agent action.
+    run_id (UUID): The run ID. This is the ID of the current run.
+    parent_run_id (UUID): The parent run ID. This is the ID of the parent run.
+    kwargs (Any): Additional keyword arguments.</p>
 </div>
 
 
@@ -690,10 +691,10 @@ you're implementing a handler for a chat model, you should use
             <div class="docstring"><p>Run when the tool ends running.</p>
 
 <p>Args:
-    output: The output of the tool.
-    run_id: The ID of the current run.
-    parent_run_id: The ID of the parent run.
-    **kwargs: Additional keyword arguments.</p>
+    output (Any): The output of the tool.
+    run_id (UUID): The run ID. This is the ID of the current run.
+    parent_run_id (UUID): The parent run ID. This is the ID of the parent run.
+    kwargs (Any): Additional keyword arguments.</p>
 </div>
 
 
@@ -722,10 +723,10 @@ you're implementing a handler for a chat model, you should use
             <div class="docstring"><p>Run on the agent end.</p>
 
 <p>Args:
-    finish: The agent finish.
-    run_id: The ID of the current run.
-    parent_run_id: The ID of the parent run.
-    **kwargs: Additional keyword arguments.</p>
+    finish (AgentFinish): The agent finish.
+    run_id (UUID): The run ID. This is the ID of the current run.
+    parent_run_id (UUID): The parent run ID. This is the ID of the parent run.
+    kwargs (Any): Additional keyword arguments.</p>
 </div>
 
 
@@ -750,10 +751,10 @@ you're implementing a handler for a chat model, you should use
             <div class="docstring"><p>Run when chain errors.</p>
 
 <p>Args:
-    error: The error that occurred.
-    run_id: The ID of the current run.
-    parent_run_id: The ID of the parent run.
-    **kwargs: Additional keyword arguments.</p>
+    error (BaseException): The error that occurred.
+    run_id (UUID): The run ID. This is the ID of the current run.
+    parent_run_id (UUID): The parent run ID. This is the ID of the parent run.
+    kwargs (Any): Additional keyword arguments.</p>
 </div>
 
 
@@ -778,10 +779,10 @@ you're implementing a handler for a chat model, you should use
             <div class="docstring"><p>Run when tool errors.</p>
 
 <p>Args:
-    error: The error that occurred.
-    run_id: The ID of the current run.
-    parent_run_id: The ID of the parent run.
-    **kwargs: Additional keyword arguments.</p>
+    error (BaseException): The error that occurred.
+    run_id (UUID): The run ID. This is the ID of the current run.
+    parent_run_id (UUID): The parent run ID. This is the ID of the parent run.
+    kwargs (Any): Additional keyword arguments.</p>
 </div>
 
 

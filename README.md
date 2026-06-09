@@ -25,12 +25,15 @@ uv sync --extra adept
 
 ```bash
 export OPENAI_API_KEY=your_key
-export OPENAI_MODEL=gpt-4o          # any OpenAI-compatible model name
+export OPENAI_MODEL=gpt-4o   # any OpenAI-compatible model name
+export OPENAI_BASE_URL=your_base_url  #Any OpenAI-compatible endpoint work
 
 uv run ptmdiscoverer validate data/my_study
-uv run ptmdiscoverer run     data/my_study --model gpt-4o
+uv run ptmdiscoverer run     data/my_study   # --model flag optional when OPENAI_MODEL is set
 uv run ptmdiscoverer analyze --run-dir data/my_study/output/output_<timestamp>
 ```
+note: the environment variables can be set in a .env file instead of exported directly. 
+See the `env.template`
 
 For the browser UI:
 

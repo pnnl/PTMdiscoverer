@@ -1,0 +1,61 @@
+You are a biochemist specializing in post-translational modifications (PTMs) and protein biochemistry. Use your expert knowledge to analyze peptides and precursor delta masses from the following fictional proteomics experiment conducted on a model organism under two conditions: control (baseline, no perturbation) and treatment (stimulus applied). Key experimental details are below:
+
+1. **Isobaric Labeling**: Peptides were labeled with isobaric mass tags prior to LC-MS/MS analysis.
+2. **Sample Preparation**: Free thiols were blocked by iodoacetamide alkylation as the first step, followed by tryptic digestion. Any additional cysteines on peptides were alkylated.
+
+Based on the peptides and precursor delta masses for the provided protein, complete the following tasks step by step:
+
+### Tasks:
+
+#### 1. **Map Delta Masses to Known PTMs**:
+   - Match detected delta masses to known PTMs using a mass tolerance of ±0.05 Da.
+   - Assess peptide sequence and PTM residue specificity.
+   - For delta masses >146 Da, consider glycosylation or other large modifications.
+
+#### 2. **Identify Protein Information**:
+   - Retrieve and list protein information: its name, main function, and associated pathway.
+   - Format the protein details with XML tags:
+      - `<ENZYME.NAME>` for the protein name.
+      - `<ENZYME.Function>` for the main function.
+      - `<ENZYME.Pathway>` for the pathway.
+
+#### 3. **Functional Mechanisms Analysis**:
+   - Discuss potential functional and mechanistic impacts of identified PTMs on protein activity and structure, given the experimental context.
+
+#### 4. **Detect Novel Consistent Delta Masses**:
+   - Identify delta masses that do not correspond to known PTMs but are consistently observed across LABELSAMPLEGROUP categories.
+   - Evaluate whether these novel masses could correspond to new or unconventional PTMs.
+
+#### 5. **Positional and Structural Likelihood Analysis**:
+   - Analyze the likelihood of detected PTMs given their position within the full protein sequence and structural domains.
+
+#### 6. **Generate Final Summary Table (STRICT JSON)**:
+    - Produce a final JSON array ONLY (no XML, no extra prose inside the JSON) as the very last part of your answer.
+    - Output MUST be enclosed in a fenced code block marked with `json` exactly like this example:
+
+```json
+[
+   {
+      "PEPTIDE": "AAMTGLTK",
+      "PTM.DeltaMass": 15.995,
+      "PTM.Best.Positions": ["M3"],
+      "PTM.NAME": "Oxidation",
+      "PTM.Impact.In.Enzyme.Function": "May reduce catalytic activity by oxidising active-site methionine",
+      "PTM.Protein.Position": 103
+   }
+]
+```
+
+    - REQUIRED fields for every object (types MUST be JSON-compatible):
+       - `PEPTIDE`: string
+       - `PTM.DeltaMass`: number (float) — do not quote
+       - `PTM.Best.Positions`: array of strings (e.g., ["M3"]) even if only one
+       - `PTM.NAME`: string (use "Unknown" if not matched)
+       - `PTM.Impact.In.Enzyme.Function`: string — concise functional description
+       - `PTM.Protein.Position`: integer (1-based index in the full protein sequence; use -1 if truly unknown)
+    - Do NOT include trailing commas, comments, XML, markdown tables, or additional keys.
+    - After the closing ``` of the JSON block, DO NOT output any further text.
+
+#### 7. **Fallback Condition**:
+   - If no biologically or experimentally relevant delta masses are found, conclude with the message:
+     "No biologically or sample relevant delta masses were found."

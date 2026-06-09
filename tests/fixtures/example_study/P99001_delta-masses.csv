@@ -1,0 +1,5 @@
+Spectrum,MSRUNID,RT,Peptide,Is.Unique,Charge,Calculated.Peptide.Mass,Calculated.M/Z,Delta.Mass,Positions.In.Protein,Best.Positions,Probability,Score.Best.Position
+ExmplRun1.00101.00101.2,1,5.21,AAMTGLTK,True,2,820.446,411.230,15.995,103.0,M3,0.9985,29.507
+ExmplRun1.00201.00201.2,1,6.87,SVMEPQAK,True,2,920.441,461.227,79.966,201.0,S1,1.0,45.148
+ExmplRun2.00201.00201.2,2,6.85,SVMEPQAK,True,2,920.441,461.227,79.966,201.0,S1,0.9999,44.231
+ExmplRun2.00301.00301.3,2,8.81,GQTAIPVLK,True,3,968.586,323.535,42.011,309.0,K9,0.9992,38.671

@@ -139,8 +139,10 @@ skip_empty = true
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+addopts = "-m 'not integration and not llm'"
 markers = [
     "unit: fast isolated unit tests",
     "integration: slower end-to-end tests",
     "slow: slow-running tests (deselect with -m 'not slow')",
+    "llm: live LLM API call tests (requires OPENAI_API_KEY; run with: pytest -m llm)",
 ]
